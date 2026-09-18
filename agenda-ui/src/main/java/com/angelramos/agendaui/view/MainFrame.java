@@ -84,21 +84,41 @@ public class MainFrame extends JFrame {
                 "Estado"
         };
 
-        modeloTabla = new DefaultTableModel(columnas, 0) {
-
+        modeloTabla = new DefaultTableModel(
+                new Object[]{"Cliente", "Fecha y hora", "Servicio", "Duración (min)", "Estado"},
+                0
+        ) {
             @Override
-            public boolean isCellEditable(int fila, int columna) {
+            public boolean isCellEditable(int row, int column) {
                 return false;
             }
         };
 
         tablaCitas = new JTable(modeloTabla);
 
-        tablaCitas.setSelectionMode(
-                ListSelectionModel.SINGLE_SELECTION
-        );
-
+        tablaCitas.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tablaCitas.setRowHeight(25);
+        tablaCitas.getTableHeader().setReorderingAllowed(false);
+
+        tablaCitas.getColumnModel().getColumn(0).setPreferredWidth(150);
+        tablaCitas.getColumnModel().getColumn(1).setPreferredWidth(150);
+        tablaCitas.getColumnModel().getColumn(2).setPreferredWidth(220);
+        tablaCitas.getColumnModel().getColumn(3).setPreferredWidth(100);
+        tablaCitas.getColumnModel().getColumn(4).setPreferredWidth(120);
+
+        javax.swing.table.DefaultTableCellRenderer centrado =
+                new javax.swing.table.DefaultTableCellRenderer();
+
+        centrado.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+
+        tablaCitas.getColumnModel().getColumn(3).setCellRenderer(centrado);
+        tablaCitas.getColumnModel().getColumn(4).setCellRenderer(centrado);
+
+        tablaCitas.getSelectionModel().addListSelectionListener(e -> {
+            boolean haySeleccion = tablaCitas.getSelectedRow() != -1;
+            botonEditar.setEnabled(haySeleccion);
+            botonEliminar.setEnabled(haySeleccion);
+        });
 
         JScrollPane scrollTabla = new JScrollPane(tablaCitas);
 
@@ -119,6 +139,8 @@ public class MainFrame extends JFrame {
         botonNueva = new JButton("Nueva cita");
         botonEditar = new JButton("Editar");
         botonEliminar = new JButton("Eliminar");
+        botonEditar.setEnabled(false);
+        botonEliminar.setEnabled(false);
         
         botonNueva.addActionListener(e -> abrirDialogoNuevaCita());
         
