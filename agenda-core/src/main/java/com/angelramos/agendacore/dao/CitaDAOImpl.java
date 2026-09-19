@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,17 +17,16 @@ public class CitaDAOImpl implements CitaDAO {
     @Override
     public List<Cita> listar() throws SQLException {
 
+        String sql = "SELECT id, nombre_cliente, fecha_hora, servicio, "
+                + "duracion_minutos, precio, estado FROM citas";
+
         List<Cita> citas = new ArrayList<>();
 
-        String sql = "SELECT id, nombre_cliente, fecha_hora, servicio, "
-                   + "duracion_minutos, estado FROM citas";
-
         try (Connection conexion = ConexionBD.obtenerConexion();
-             PreparedStatement sentencia = conexion.prepareStatement(sql);
-             ResultSet resultado = sentencia.executeQuery()) {
+                PreparedStatement sentencia = conexion.prepareStatement(sql);
+                ResultSet resultado = sentencia.executeQuery()) {
 
             while (resultado.next()) {
-
                 citas.add(convertirCita(resultado));
             }
         }
@@ -38,10 +38,10 @@ public class CitaDAOImpl implements CitaDAO {
     public Cita buscarPorId(int id) throws SQLException {
 
         String sql = "SELECT id, nombre_cliente, fecha_hora, servicio, "
-                   + "duracion_minutos, estado FROM citas WHERE id = ?";
+                + "duracion_minutos, precio, estado FROM citas WHERE id = ?";
 
         try (Connection conexion = ConexionBD.obtenerConexion();
-             PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+                PreparedStatement sentencia = conexion.prepareStatement(sql)) {
 
             sentencia.setInt(1, id);
 
@@ -60,17 +60,18 @@ public class CitaDAOImpl implements CitaDAO {
     public void guardar(Cita cita) throws SQLException {
 
         String sql = "INSERT INTO citas "
-                   + "(nombre_cliente, fecha_hora, servicio, duracion_minutos, estado) "
-                   + "VALUES (?, ?, ?, ?, ?)";
+                + "(nombre_cliente, fecha_hora, servicio, duracion_minutos, precio, estado) "
+                + "VALUES (?, ?, ?, ?, ?, ?)";
 
         try (Connection conexion = ConexionBD.obtenerConexion();
-             PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+                PreparedStatement sentencia = conexion.prepareStatement(sql)) {
 
             sentencia.setString(1, cita.getNombreCliente());
-            sentencia.setTimestamp(2, java.sql.Timestamp.valueOf(cita.getFechaHora()));
+            sentencia.setTimestamp(2, Timestamp.valueOf(cita.getFechaHora()));
             sentencia.setString(3, cita.getServicio());
             sentencia.setInt(4, cita.getDuracionMinutos());
-            sentencia.setString(5, cita.getEstado().name());
+            sentencia.setDouble(5, cita.getPrecio());
+            sentencia.setString(6, cita.getEstado().name());
 
             sentencia.executeUpdate();
         }
@@ -80,22 +81,24 @@ public class CitaDAOImpl implements CitaDAO {
     public void actualizar(Cita cita) throws SQLException {
 
         String sql = "UPDATE citas SET "
-                   + "nombre_cliente = ?, "
-                   + "fecha_hora = ?, "
-                   + "servicio = ?, "
-                   + "duracion_minutos = ?, "
-                   + "estado = ? "
-                   + "WHERE id = ?";
+                + "nombre_cliente = ?, "
+                + "fecha_hora = ?, "
+                + "servicio = ?, "
+                + "duracion_minutos = ?, "
+                + "precio = ?, "
+                + "estado = ? "
+                + "WHERE id = ?";
 
         try (Connection conexion = ConexionBD.obtenerConexion();
-             PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+                PreparedStatement sentencia = conexion.prepareStatement(sql)) {
 
             sentencia.setString(1, cita.getNombreCliente());
-            sentencia.setTimestamp(2, java.sql.Timestamp.valueOf(cita.getFechaHora()));
+            sentencia.setTimestamp(2, Timestamp.valueOf(cita.getFechaHora()));
             sentencia.setString(3, cita.getServicio());
             sentencia.setInt(4, cita.getDuracionMinutos());
-            sentencia.setString(5, cita.getEstado().name());
-            sentencia.setInt(6, cita.getId());
+            sentencia.setDouble(5, cita.getPrecio());
+            sentencia.setString(6, cita.getEstado().name());
+            sentencia.setInt(7, cita.getId());
 
             sentencia.executeUpdate();
         }
@@ -107,7 +110,7 @@ public class CitaDAOImpl implements CitaDAO {
         String sql = "DELETE FROM citas WHERE id = ?";
 
         try (Connection conexion = ConexionBD.obtenerConexion();
-             PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+                PreparedStatement sentencia = conexion.prepareStatement(sql)) {
 
             sentencia.setInt(1, id);
 
@@ -119,20 +122,19 @@ public class CitaDAOImpl implements CitaDAO {
 
         int id = resultado.getInt("id");
         String nombreCliente = resultado.getString("nombre_cliente");
-        java.time.LocalDateTime fechaHora =
-                resultado.getTimestamp("fecha_hora").toLocalDateTime();
+        Timestamp timestamp = resultado.getTimestamp("fecha_hora");
         String servicio = resultado.getString("servicio");
         int duracionMinutos = resultado.getInt("duracion_minutos");
-
-        EstadoCita estado =
-                EstadoCita.valueOf(resultado.getString("estado"));
+        double precio = resultado.getDouble("precio");
+        EstadoCita estado = EstadoCita.valueOf(resultado.getString("estado"));
 
         return new Cita(
                 id,
                 nombreCliente,
-                fechaHora,
+                timestamp.toLocalDateTime(),
                 servicio,
                 duracionMinutos,
+                precio,
                 estado
         );
     }

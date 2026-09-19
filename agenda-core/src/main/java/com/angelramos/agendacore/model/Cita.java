@@ -5,25 +5,41 @@ import java.time.LocalDateTime;
 public class Cita {
 
     private int id;
-
     private String nombreCliente;
-
     private LocalDateTime fechaHora;
-
     private String servicio;
-
     private int duracionMinutos;
-
+    private double precio;
     private EstadoCita estado;
 
-    public Cita(String nombreCliente, LocalDateTime fechaHora, String servicio, int duracionMinutos) {
+    public Cita(String nombreCliente, LocalDateTime fechaHora, String servicio,
+            int duracionMinutos, double precio) {
 
         this.nombreCliente = nombreCliente;
         this.fechaHora = fechaHora;
         this.servicio = servicio;
         this.duracionMinutos = duracionMinutos;
+        this.precio = precio;
         this.estado = EstadoCita.PENDIENTE;
+    }
 
+    public Cita(String nombreCliente, LocalDateTime fechaHora, String servicio,
+            int duracionMinutos) {
+
+        this(nombreCliente, fechaHora, servicio, duracionMinutos, 0.00);
+    }
+
+    public Cita(int id, String nombreCliente, LocalDateTime fechaHora,
+            String servicio, int duracionMinutos, double precio,
+            EstadoCita estado) {
+
+        this.id = id;
+        this.nombreCliente = nombreCliente;
+        this.fechaHora = fechaHora;
+        this.servicio = servicio;
+        this.duracionMinutos = duracionMinutos;
+        this.precio = precio;
+        this.estado = estado;
     }
 
     public int getId() {
@@ -66,6 +82,14 @@ public class Cita {
         this.duracionMinutos = duracionMinutos;
     }
 
+    public double getPrecio() {
+        return precio;
+    }
+
+    public void setPrecio(double precio) {
+        this.precio = precio;
+    }
+
     public EstadoCita getEstado() {
         return estado;
     }
@@ -73,18 +97,6 @@ public class Cita {
     public void setEstado(EstadoCita estado) {
         this.estado = estado;
     }
-
-    public Cita(int id, String nombreCliente, LocalDateTime fechaHora, String servicio,
-            int duracionMinutos, EstadoCita estado) {
-
-        this.id = id;
-        this.nombreCliente = nombreCliente;
-        this.fechaHora = fechaHora;
-        this.servicio = servicio;
-        this.duracionMinutos = duracionMinutos;
-        this.estado = estado;
-
-    }
-
 }
+
 

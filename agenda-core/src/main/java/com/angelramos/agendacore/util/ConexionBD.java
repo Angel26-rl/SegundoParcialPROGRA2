@@ -14,6 +14,3 @@ public class ConexionBD {
         return DriverManager.getConnection(URL, USUARIO, CONTRASENA);
     }
 }
-
-
-

@@ -3,21 +3,20 @@ package com.angelramos.agendaui.view;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.sql.SQLException;
+import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
-
-import java.sql.SQLException;
-import java.util.List;
-
-import javax.swing.JOptionPane;
 
 import com.angelramos.agendacore.model.Cita;
 import com.angelramos.agendacore.service.CitaService;
@@ -31,6 +30,9 @@ public class MainFrame extends JFrame {
     private JButton botonNueva;
     private JButton botonEditar;
     private JButton botonEliminar;
+    
+    private JLabel etiquetaPrecioMaximo;
+    private JLabel etiquetaPrecioMinimo;
 
     public MainFrame() {
         citaService = new CitaService();
@@ -45,8 +47,8 @@ public class MainFrame extends JFrame {
     private void configurarVentana() {
 
         setTitle("AgendaServicios");
-        setSize(900, 550);
-        setMinimumSize(new Dimension(800, 500));
+        setSize(1000, 550);
+        setMinimumSize(new Dimension(900, 500));
         setLocationRelativeTo(null);
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -69,15 +71,39 @@ public class MainFrame extends JFrame {
 
         panelTitulo.add(titulo);
 
-        add(panelTitulo, BorderLayout.NORTH);
+        JPanel panelSuperior = new JPanel(
+                new BorderLayout()
+        );
 
+        panelSuperior.add(panelTitulo, BorderLayout.NORTH);
+
+        JPanel panelPrecios = new JPanel(
+                new FlowLayout(FlowLayout.LEFT, 20, 5)
+        );
+
+        etiquetaPrecioMaximo = new JLabel("Precio máximo: Q 0.00");
+        etiquetaPrecioMinimo = new JLabel("Precio mínimo: Q 0.00");
+
+        panelPrecios.add(etiquetaPrecioMaximo);
+        panelPrecios.add(etiquetaPrecioMinimo);
+
+        panelSuperior.add(panelPrecios, BorderLayout.SOUTH);
+
+        add(panelSuperior, BorderLayout.NORTH);
 
         // =====================================================
         // TABLA
         // =====================================================
 
         modeloTabla = new DefaultTableModel(
-                new Object[]{"Cliente", "Fecha y hora", "Servicio", "Duración (min)", "Estado"},
+                new Object[]{
+                        "Cliente",
+                        "Fecha y hora",
+                        "Servicio",
+                        "Duración (min)",
+                        "Precio",
+                        "Estado"
+                },
                 0
         ) {
             @Override
@@ -88,26 +114,42 @@ public class MainFrame extends JFrame {
 
         tablaCitas = new JTable(modeloTabla);
 
-        tablaCitas.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        tablaCitas.setSelectionMode(
+                ListSelectionModel.SINGLE_SELECTION
+        );
+
         tablaCitas.setRowHeight(25);
+
         tablaCitas.getTableHeader().setReorderingAllowed(false);
 
         tablaCitas.getColumnModel().getColumn(0).setPreferredWidth(150);
         tablaCitas.getColumnModel().getColumn(1).setPreferredWidth(150);
         tablaCitas.getColumnModel().getColumn(2).setPreferredWidth(220);
         tablaCitas.getColumnModel().getColumn(3).setPreferredWidth(100);
-        tablaCitas.getColumnModel().getColumn(4).setPreferredWidth(120);
+        tablaCitas.getColumnModel().getColumn(4).setPreferredWidth(100);
+        tablaCitas.getColumnModel().getColumn(5).setPreferredWidth(120);
 
-        javax.swing.table.DefaultTableCellRenderer centrado =
-                new javax.swing.table.DefaultTableCellRenderer();
+        DefaultTableCellRenderer centrado =
+                new DefaultTableCellRenderer();
 
-        centrado.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        centrado.setHorizontalAlignment(
+                javax.swing.SwingConstants.CENTER
+        );
 
-        tablaCitas.getColumnModel().getColumn(3).setCellRenderer(centrado);
-        tablaCitas.getColumnModel().getColumn(4).setCellRenderer(centrado);
+        tablaCitas.getColumnModel().getColumn(3)
+                .setCellRenderer(centrado);
+
+        tablaCitas.getColumnModel().getColumn(4)
+                .setCellRenderer(centrado);
+
+        tablaCitas.getColumnModel().getColumn(5)
+                .setCellRenderer(centrado);
 
         tablaCitas.getSelectionModel().addListSelectionListener(e -> {
-            boolean haySeleccion = tablaCitas.getSelectedRow() != -1;
+
+            boolean haySeleccion =
+                    tablaCitas.getSelectedRow() != -1;
+
             botonEditar.setEnabled(haySeleccion);
             botonEliminar.setEnabled(haySeleccion);
         });
@@ -115,15 +157,18 @@ public class MainFrame extends JFrame {
         JScrollPane scrollTabla = new JScrollPane(tablaCitas);
 
         JPanel panelTabla = new JPanel(new BorderLayout());
+
         panelTabla.setBorder(
                 BorderFactory.createEmptyBorder(5, 10, 5, 10)
         );
 
-        panelTabla.add(scrollTabla, BorderLayout.CENTER);
+        panelTabla.add(
+                scrollTabla,
+                BorderLayout.CENTER
+        );
 
         add(panelTabla, BorderLayout.CENTER);
-
-
+   
         // =====================================================
         // BOTONES
         // =====================================================
@@ -135,13 +180,24 @@ public class MainFrame extends JFrame {
         botonEditar.setEnabled(false);
         botonEliminar.setEnabled(false);
 
-        botonNueva.addActionListener(e -> abrirDialogoNuevaCita());
+        botonNueva.addActionListener(
+                e -> abrirDialogoNuevaCita()
+        );
 
-        botonEditar.addActionListener(e -> editarCita());
-        botonEliminar.addActionListener(e -> eliminarCita());
+        botonEditar.addActionListener(
+                e -> editarCita()
+        );
+
+        botonEliminar.addActionListener(
+                e -> eliminarCita()
+        );
 
         JPanel panelBotones = new JPanel(
-                new FlowLayout(FlowLayout.RIGHT, 10, 10)
+                new FlowLayout(
+                        FlowLayout.RIGHT,
+                        10,
+                        10
+                )
         );
 
         panelBotones.add(botonNueva);
@@ -164,24 +220,66 @@ public class MainFrame extends JFrame {
 
         try {
 
-            List<Cita> citas = citaService.listarCitas();
+        	List<Cita> citas =
+        	        citaService.listarCitas();
 
-            modeloTabla.setRowCount(0);
+        	modeloTabla.setRowCount(0);
 
-            for (Cita cita : citas) {
+        	double precioMaximo = 0;
+        	double precioMinimo = 0;
+
+        	if (!citas.isEmpty()) {
+
+        	    precioMaximo = citas.get(0).getPrecio();
+        	    precioMinimo = citas.get(0).getPrecio();
+
+        	    for (Cita cita : citas) {
+
+        	        if (cita.getPrecio() > precioMaximo) {
+        	            precioMaximo = cita.getPrecio();
+        	        }
+
+        	        if (cita.getPrecio() < precioMinimo) {
+        	            precioMinimo = cita.getPrecio();
+        	        }
+        	    }
+        	}
+
+        	for (Cita cita : citas) {
+        		
 
                 Object[] fila = {
+
                         cita.getNombreCliente(),
+
                         cita.getFechaHora().format(
-                                java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
+                                java.time.format.DateTimeFormatter
+                                        .ofPattern("yyyy-MM-dd HH:mm")
                         ),
+
                         cita.getServicio(),
+
                         cita.getDuracionMinutos(),
+
+                        String.format(
+                                "Q %.2f",
+                                cita.getPrecio()
+                        ),
+
                         cita.getEstado()
                 };
 
                 modeloTabla.addRow(fila);
             }
+        	
+        	
+        	etiquetaPrecioMaximo.setText(
+        	        String.format("Precio máximo: Q %.2f", precioMaximo)
+        	);
+
+        	etiquetaPrecioMinimo.setText(
+        	        String.format("Precio mínimo: Q %.2f", precioMinimo)
+        	);
 
         } catch (SQLException e) {
 
@@ -197,7 +295,8 @@ public class MainFrame extends JFrame {
 
     private void editarCita() {
 
-        int filaSeleccionada = tablaCitas.getSelectedRow();
+        int filaSeleccionada =
+                tablaCitas.getSelectedRow();
 
         if (filaSeleccionada == -1) {
 
@@ -213,11 +312,14 @@ public class MainFrame extends JFrame {
 
         try {
 
-            List<Cita> citas = citaService.listarCitas();
+            List<Cita> citas =
+                    citaService.listarCitas();
 
-            Cita cita = citas.get(filaSeleccionada);
+            Cita cita =
+                    citas.get(filaSeleccionada);
 
-            CitaDialog dialogo = new CitaDialog(cita);
+            CitaDialog dialogo =
+                    new CitaDialog(cita);
 
             dialogo.setVisible(true);
 
@@ -237,7 +339,8 @@ public class MainFrame extends JFrame {
 
     private void eliminarCita() {
 
-        int filaSeleccionada = tablaCitas.getSelectedRow();
+        int filaSeleccionada =
+                tablaCitas.getSelectedRow();
 
         if (filaSeleccionada == -1) {
 
@@ -253,24 +356,29 @@ public class MainFrame extends JFrame {
 
         try {
 
-            List<Cita> citas = citaService.listarCitas();
+            List<Cita> citas =
+                    citaService.listarCitas();
 
-            Cita cita = citas.get(filaSeleccionada);
+            Cita cita =
+                    citas.get(filaSeleccionada);
 
-            int respuesta = JOptionPane.showConfirmDialog(
-                    this,
-                    "¿Deseas eliminar la cita de "
+            int respuesta =
+                    JOptionPane.showConfirmDialog(
+                            this,
+                            "¿Deseas eliminar la cita de "
                             + cita.getNombreCliente() + "?",
-                    "Confirmar eliminación",
-                    JOptionPane.YES_NO_OPTION,
-                    JOptionPane.WARNING_MESSAGE
-            );
+                            "Confirmar eliminación",
+                            JOptionPane.YES_NO_OPTION,
+                            JOptionPane.WARNING_MESSAGE
+                    );
 
             if (respuesta != JOptionPane.YES_OPTION) {
                 return;
             }
 
-            citaService.eliminarCita(cita.getId());
+            citaService.eliminarCita(
+                    cita.getId()
+            );
 
             JOptionPane.showMessageDialog(
                     this,
@@ -291,7 +399,9 @@ public class MainFrame extends JFrame {
                     JOptionPane.ERROR_MESSAGE
             );
 
-        } catch (com.angelramos.agendacore.exception.ValidacionException e) {
+        } catch (
+                com.angelramos.agendacore.exception.ValidacionException e
+        ) {
 
             JOptionPane.showMessageDialog(
                     this,
@@ -302,3 +412,5 @@ public class MainFrame extends JFrame {
         }
     }
 }
+
+
