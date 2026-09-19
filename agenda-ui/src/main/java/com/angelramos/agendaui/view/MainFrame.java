@@ -36,9 +36,9 @@ public class MainFrame extends JFrame {
         citaService = new CitaService();
 
         configurarVentana();
-        
+
         inicializarComponentes();
-        
+
         cargarCitas();
     }
 
@@ -75,14 +75,6 @@ public class MainFrame extends JFrame {
         // =====================================================
         // TABLA
         // =====================================================
-
-        String[] columnas = {
-                "Cliente",
-                "Fecha y hora",
-                "Servicio",
-                "Duración (min)",
-                "Estado"
-        };
 
         modeloTabla = new DefaultTableModel(
                 new Object[]{"Cliente", "Fecha y hora", "Servicio", "Duración (min)", "Estado"},
@@ -139,11 +131,12 @@ public class MainFrame extends JFrame {
         botonNueva = new JButton("Nueva cita");
         botonEditar = new JButton("Editar");
         botonEliminar = new JButton("Eliminar");
+
         botonEditar.setEnabled(false);
         botonEliminar.setEnabled(false);
-        
+
         botonNueva.addActionListener(e -> abrirDialogoNuevaCita());
-        
+
         botonEditar.addActionListener(e -> editarCita());
         botonEliminar.addActionListener(e -> eliminarCita());
 
@@ -157,14 +150,16 @@ public class MainFrame extends JFrame {
 
         add(panelBotones, BorderLayout.SOUTH);
     }
-    
+
     private void abrirDialogoNuevaCita() {
 
         CitaDialog dialogo = new CitaDialog();
 
         dialogo.setVisible(true);
+
+        cargarCitas();
     }
-    
+
     private void cargarCitas() {
 
         try {
@@ -177,7 +172,9 @@ public class MainFrame extends JFrame {
 
                 Object[] fila = {
                         cita.getNombreCliente(),
-                        cita.getFechaHora(),
+                        cita.getFechaHora().format(
+                                java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
+                        ),
                         cita.getServicio(),
                         cita.getDuracionMinutos(),
                         cita.getEstado()
@@ -197,7 +194,7 @@ public class MainFrame extends JFrame {
             );
         }
     }
-    
+
     private void editarCita() {
 
         int filaSeleccionada = tablaCitas.getSelectedRow();
@@ -224,6 +221,8 @@ public class MainFrame extends JFrame {
 
             dialogo.setVisible(true);
 
+            cargarCitas();
+
         } catch (SQLException e) {
 
             JOptionPane.showMessageDialog(
@@ -235,7 +234,7 @@ public class MainFrame extends JFrame {
             );
         }
     }
-    
+
     private void eliminarCita() {
 
         int filaSeleccionada = tablaCitas.getSelectedRow();
